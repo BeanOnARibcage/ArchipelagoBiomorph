@@ -19,7 +19,7 @@ class BiomorphWorld(World):
 	def create_regions(self):
 		opening = Region("Opening", self.player, self.multiworld)
 		self.multiworld.regions += [opening]
-		opening.add_locations(location_name_to_id, BiomorphLocation)
+		opening.add_locations(self.location_name_to_id, BiomorphLocation)
 		
 	def set_rules(self):
 		pass
