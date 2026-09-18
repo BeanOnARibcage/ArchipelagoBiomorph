@@ -37,7 +37,8 @@ class BiomorphWorld(World):
 		place_starting_weapon(self)
 		
 	def fill_slot_data(self):
-		return {"starting_weapon": self.item_name_to_id[self.starting_weapon]}
+		id = self.item_name_to_id[self.starting_weapon]
+		return {"starting_weapon": id}
 		
 	def create_item(self, name):
 		return BiomorphItem(name, ItemClassification.filler, item_name_to_id[name], self.player)
