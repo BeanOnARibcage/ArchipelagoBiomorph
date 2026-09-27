@@ -70,9 +70,8 @@ item_id_to_info = {109: [1, 1],
 	1: [1, 0, True],
 	2: [2, 2]}
 	
-# starting_weapons = [x for x in item_name_to_id if item_name_to_id[x] // 100 in (2, 4) and \
-# 	item_name_to_id[x] not in (400, 430)]
-starting_weapons = ["Scarbyttle Biomorph"]
+starting_weapons = [x for x in item_name_to_id if item_name_to_id[x] // 100 in (2, 4) and \
+	item_name_to_id[x] not in (400, 430)]
 chargeless_weapons = ("The Bruisers", "Fubirang Biomorph")
 
 def create_items_function(world):

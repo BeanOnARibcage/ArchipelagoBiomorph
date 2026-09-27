@@ -72,4 +72,7 @@ def location_logic(world):
 	scarbyttle_2 = world.get_location("Biomorphs: 12 Scarbyttles")
 	world.set_rule(scarbyttle_2, rb.Has("Scarbyttle Progress", 12))
 	
+	secret_highway = world.get_location("Mezzo: Secret Highway Arena")
+	world.set_rule(secret_highway, rb.HasAny(*chargeless_weapons))
+	
 	world.set_completion_rule(rb.Has("Goal"))

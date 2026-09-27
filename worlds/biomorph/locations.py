@@ -76,7 +76,6 @@ def create_events(world):
 			for monster_number in monster_locations[region_name][monster_name]:
 				region.add_event(monster_name + " " + str(monster_number), \
 					monster_name + " Progress", None, BiomorphLocation, BiomorphItem)
-				print("Adding event")
 	goal_region = world.get_region("Goal Region")
 	goal_region.add_event("Enter the Dunes", "Goal", None, BiomorphLocation, BiomorphItem)
 		
