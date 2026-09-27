@@ -3,10 +3,10 @@ from Options import PerGameCommonOptions
 from .Locations import location_table, AdventureLocation, dragon_room_to_region
 
 
-def connect(multiworld: MultiWorld, player: int, source: str, target: str, rule: callable = lambda state: True,
+def connect(world: MultiWorld, player: int, source: str, target: str, rule: callable = lambda state: True,
             one_way=False, name=None):
-    source_region = multiworld.get_region(source, player)
-    target_region = multiworld.get_region(target, player)
+    source_region = world.get_region(source, player)
+    target_region = world.get_region(target, player)
 
     if name is None:
         name = source + " to " + target
@@ -22,7 +22,7 @@ def connect(multiworld: MultiWorld, player: int, source: str, target: str, rule:
     source_region.exits.append(connection)
     connection.connect(target_region)
     if not one_way:
-        connect(multiworld, player, target, source, rule, True)
+        connect(world, player, target, source, rule, True)
 
 
 def create_regions(options: PerGameCommonOptions, multiworld: MultiWorld, player: int, dragon_rooms: []) -> None:

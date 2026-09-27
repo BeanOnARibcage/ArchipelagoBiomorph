@@ -88,7 +88,7 @@ def run_locations_benchmark(freeze_gc: bool = True) -> None:
                     if not locations:
                         continue
 
-                    all_state = multiworld.get_all_state()
+                    all_state = multiworld.get_all_state(False)
                     for location in locations:
                         time_taken = self.location_test(location, multiworld.state, "empty_state")
                         summary_data["empty_state"][location.name] = time_taken

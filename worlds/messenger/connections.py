@@ -37,7 +37,7 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Autumn Hills - Lakeside Checkpoint",
         ],
         "Dimension Climb Shop": [
-            "Autumn Hills - Lakeside Checkpoint",  # Only possible in 16 bits
+            "Autumn Hills - Lakeside Checkpoint",
             "Autumn Hills - Portal",
             "Autumn Hills - Double Swing Checkpoint",
         ],
@@ -60,7 +60,7 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
         "Double Swing Checkpoint": [
             "Autumn Hills - Dimension Climb Shop",
             "Autumn Hills - Spike Ball Swing Checkpoint",
-            "Autumn Hills - Bottom",  # Only possible in 16 bits
+            "Autumn Hills - Bottom",
         ],
         "Spike Ball Swing Checkpoint": [
             "Autumn Hills - Double Swing Checkpoint",
@@ -90,6 +90,7 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Forlorn Temple - Sunny Day Checkpoint",
         ],
         "Climb Shop": [
+            "Forlorn Temple - Rocket Maze Checkpoint",
             "Forlorn Temple - Rocket Sunset Shop",
         ],
         "Rocket Sunset Shop": [
@@ -134,7 +135,6 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
         ],
         "Triple Spike Crushers Shop": [
             "Catacombs - Bottom Left",
-            "Catacombs - Top Left",
             "Catacombs - Death Trap Checkpoint",
         ],
         "Ruxxtin Shop": [
@@ -153,7 +153,7 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Catacombs - Bottom",
             "Catacombs - Death Trap Checkpoint",
             "Catacombs - Crusher Gauntlet Checkpoint",
-            "Catacombs - Ruxxtin Shop",  # In 16 bits, requires rope dart (to reach the Dirty Pond Seal as well)
+            "Catacombs - Ruxxtin Shop",
         ],
     },
     "Bamboo Creek": {
@@ -316,7 +316,7 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
         "Searing Mega Shard Shop": [
             "Searing Crags - Falling Rocks Shop",
             "Searing Crags - Before Final Climb Shop",
-            "Searing Crags - Key of Strength Room",
+            "Searing Crags - Key of Strength Shop",
         ],
         "Before Final Climb Shop": [
             "Searing Crags - Raining Rocks Checkpoint",
@@ -330,9 +330,6 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Searing Crags - Top",
         ],
         "Key of Strength Shop": [
-            "Searing Crags - Key of Strength Room",
-        ],
-        "Key of Strength Room": [
             "Searing Crags - Searing Mega Shard Shop",
         ],
         "Triple Ball Spinner Checkpoint": [
@@ -486,7 +483,8 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
         "Barm'athaziel Shop": [
             "Underworld - Hot Tub Checkpoint",
         ],
-        "Key of Chaos Shop": [],
+        "Key of Chaos Shop": [
+        ],
         "Hot Dip Checkpoint": [
             "Underworld - Left Shop",
             "Underworld - Fireball Wave Shop",
@@ -535,7 +533,8 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
         "Restock Shop": [
             "Riviere Turquoise - Butterfly Matriarch Shop",
         ],
-        "Butterfly Matriarch Shop": [],
+        "Butterfly Matriarch Shop": [
+        ],
         "Flower Flight Checkpoint": [
             "Riviere Turquoise - Waterfall Shop",
             "Riviere Turquoise - Launch of Faith Shop",
@@ -554,7 +553,6 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Elemental Skylands - Air Generator Shop",
         ],
         "Air Generator Shop": [
-            "Elemental Skylands - Air Seal Checkpoint",
             "Elemental Skylands - Earth Shmup",
         ],
         "Earth Shmup": [
@@ -573,7 +571,6 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
             "Elemental Skylands - Water Generator Shop",
         ],
         "Water Generator Shop": [
-            "Elemental Skylands - Water Intro Shop",
             "Elemental Skylands - Fire Shmup",
         ],
         "Fire Shmup": [
@@ -639,7 +636,6 @@ CONNECTIONS: dict[str, dict[str, list[str]]] = {
     },
 }
 
-# fmt: off
 RANDOMIZED_CONNECTIONS: dict[str, str] = {
     "Ninja Village - Right":            "Autumn Hills - Left",
     "Autumn Hills - Left":              "Ninja Village - Right",
@@ -679,7 +675,6 @@ RANDOMIZED_CONNECTIONS: dict[str, str] = {
     "Dark Cave - Left":                 "Riviere Turquoise - Right",
     "Sunken Shrine - Left":             "Howling Grotto - Bottom",
 }
-# fmt: on
 
 TRANSITIONS: list[str] = [
     "Ninja Village - Right",

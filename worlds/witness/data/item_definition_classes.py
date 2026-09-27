@@ -35,7 +35,7 @@ class ItemDefinition:
 
 @dataclass(frozen=True)
 class ProgressiveItemDefinition(ItemDefinition):
-    pass
+    child_item_names: List[str]
 
 
 @dataclass(frozen=True)

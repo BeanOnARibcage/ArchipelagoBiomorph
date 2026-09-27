@@ -22,7 +22,7 @@ worlds_paths = [
 # Only check source folders for now. Zip validation should probably be in the loader and/or installer.
 source_world_names = [
     k
-    for k, v in AutoWorldRegister.testable_worlds.items()
+    for k, v in AutoWorldRegister.world_types.items()
     if not v.zip_path and not Path(v.__file__).is_relative_to(test_path)
 ]
 
@@ -43,7 +43,6 @@ def get_source_world_manifest_path(game: str) -> Path | None:
 # TODO: remove the filter once manifests are mandatory.
 @classvar_matrix(game=filter(get_source_world_manifest_path, source_world_names))
 class TestWorldManifest(unittest.TestCase):
-    world_relevant = True
     game: ClassVar[str]
     manifest: ClassVar[dict[str, Any]]
 

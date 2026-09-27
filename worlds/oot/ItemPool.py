@@ -336,10 +336,10 @@ def replace_max_item(items, item, max, rand):
 
 
 def generate_itempool(ootworld):
-    multiworld = ootworld.multiworld
+    world = ootworld.multiworld
     player = ootworld.player
     global random
-    random = multiworld.random
+    random = world.random
 
     junk_pool = get_junk_pool(ootworld)
 
@@ -347,7 +347,7 @@ def generate_itempool(ootworld):
     (pool, placed_items) = get_pool_core(ootworld)
     ootworld.itempool = [ootworld.create_item(item) for item in pool]
     for (location_name, item) in placed_items.items():
-        location = multiworld.get_location(location_name, player)
+        location = world.get_location(location_name, player)
         location.place_locked_item(ootworld.create_item(item, allow_arbitrary_name=True))
 
 

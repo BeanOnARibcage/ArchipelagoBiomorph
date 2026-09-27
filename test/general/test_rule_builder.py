@@ -12,7 +12,6 @@ from rule_builder.field_resolvers import FieldResolver, FromOption, FromWorldAtt
 from rule_builder.options import Operator, OptionFilter
 from rule_builder.rules import (
     And,
-    AtLeast,
     CanReachEntrance,
     CanReachLocation,
     CanReachRegion,
@@ -160,18 +159,6 @@ class CachedRuleBuilderTestCase(RuleBuilderTestCase):
 @classvar_matrix(
     rules=(
         (
-            And(),
-            True_.Resolved(player=1)
-        ),
-        (
-            Or(),
-            False_.Resolved(player=1)
-        ),
-        (
-            Has("A", 0),
-            True_.Resolved(player=1)
-        ),
-        (
             And(Has("A", 1), Has("A", 2)),
             Has.Resolved("A", 2, player=1),
         ),
@@ -262,40 +249,6 @@ class CachedRuleBuilderTestCase(RuleBuilderTestCase):
         (
             Or(HasAnyCount({"A": 1, "B": 2}), HasAnyCount({"A": 2, "B": 2})),
             HasAnyCount.Resolved((("A", 1), ("B", 2)), player=1),
-        ),
-        (
-            AtLeast(0, Has("A")),
-            True_.Resolved(player=1),
-        ),
-        (
-            AtLeast(3, True_(), Has("A"), Has("B"), Has("C")),
-            AtLeast.Resolved(
-                (Has.Resolved("A", player=1), Has.Resolved("B", player=1), Has.Resolved("C", player=1)), 2, player=1
-            ),
-        ),
-        (
-            AtLeast(2, False_(), Has("A"), Has("B"), Has("C")),
-            AtLeast.Resolved(
-                (Has.Resolved("A", player=1), Has.Resolved("B", player=1), Has.Resolved("C", player=1)), 2, player=1
-            ),
-        ),
-        (
-            AtLeast(2, True_(), True_(), Has("A")),
-            True_.Resolved(player=1),
-        ),
-        (
-            AtLeast(3, Has("A"), Has("B")),
-            False_.Resolved(player=1),
-        ),
-        (
-            # This test will fail when Or(Rule, Rule) will be optimized to Rule
-            AtLeast(1, Rule(), Rule()),
-            Or.Resolved((Rule.Resolved(player=1), Rule.Resolved(player=1)), player=1),
-        ),
-        (
-            # This test will fail when And(Rule, Rule) will be optimized to Rule
-            AtLeast(2, Rule(), Rule()),
-            And.Resolved((Rule.Resolved(player=1), Rule.Resolved(player=1)), player=1),
         ),
     )
 )
@@ -462,15 +415,6 @@ class TestHashes(RuleBuilderTestCase):
         rule1 = HasAll("1", "2")
         rule2 = HasAll("2", "2", "2", "1")
         self.assertEqual(hash(rule1.resolve(world)), hash(rule2.resolve(world)))
-
-    def test_hash_collision(self) -> None:
-        multiworld = setup_solo_multiworld(self.world_cls, steps=("generate_early",), seed=0)
-        world = multiworld.worlds[1]
-        rule1 = Has("A", count=1).resolve(world)
-        rule2 = Has("A", count=1 << 61).resolve(world)
-        self.assertEqual(hash(rule1), hash(rule2))
-        self.assertNotEqual(rule1, rule2)
-        self.assertNotEqual(id(rule1), id(rule2))
 
 
 class TestCaching(CachedRuleBuilderTestCase):
@@ -678,24 +622,6 @@ class TestRules(RuleBuilderTestCase):
         self.state.remove(item)
         self.assertFalse(resolved_rule(self.state))
 
-    def test_at_least(self) -> None:
-        # Has has to be relied on as True_ and False_ would be optimized out
-        rule = AtLeast(2, Has("Item 1"), Has("Item 1"), Has("Item 2"), Has("Item 3"))
-        resolved_rule = rule.resolve(self.world)
-        self.world.register_rule_dependencies(resolved_rule)
-        item1 = self.world.create_item("Item 1")
-        item2 = self.world.create_item("Item 2")
-        item3 = self.world.create_item("Item 3")
-        self.assertFalse(resolved_rule(self.state))
-        self.state.collect(item1)
-        self.assertTrue(resolved_rule(self.state))
-        self.state.collect(item2)
-        self.assertTrue(resolved_rule(self.state))
-        self.state.remove(item1)
-        self.assertFalse(resolved_rule(self.state))
-        self.state.collect(item3)
-        self.assertTrue(resolved_rule(self.state))
-
     def test_has_all(self) -> None:
         rule = HasAll("Item 1", "Item 2")
         resolved_rule = rule.resolve(self.world)
@@ -871,13 +797,8 @@ class TestSerialization(RuleBuilderTestCase):
                 OptionFilter(ChoiceOption, ChoiceOption.option_second, "ge"),
             ],
         ),
-        AtLeast(
-            FromWorldAttr("instance_data.at_least_requirement"),
-            Has("i15", count=2),
-            HasGroup("g2", count=3),
-        ),
         CanReachEntrance("e1"),
-        HasGroupUnique("g3", count=5),
+        HasGroupUnique("g2", count=5),
     )
 
     rule_dict: ClassVar[dict[str, Any]] = {
@@ -1002,29 +923,6 @@ class TestSerialization(RuleBuilderTestCase):
                 ],
             },
             {
-                "rule": "AtLeast",
-                "options": [],
-                "filtered_resolution": False,
-                "count": {"resolver": "FromWorldAttr", "name": "instance_data.at_least_requirement"},
-                "children": [
-                    {
-                        "rule": "Has",
-                        "options": [],
-                        "filtered_resolution": False,
-                        "args": {
-                            "item_name": "i15",
-                            "count": 2,
-                        },
-                    },
-                    {
-                        "rule": "HasGroup",
-                        "options": [],
-                        "filtered_resolution": False,
-                        "args": {"item_name_group": "g2", "count": 3},
-                    },
-                ],
-            },
-            {
                 "rule": "CanReachEntrance",
                 "options": [],
                 "filtered_resolution": False,
@@ -1034,7 +932,7 @@ class TestSerialization(RuleBuilderTestCase):
                 "rule": "HasGroupUnique",
                 "options": [],
                 "filtered_resolution": False,
-                "args": {"item_name_group": "g3", "count": 5},
+                "args": {"item_name_group": "g2", "count": 5},
             },
         ],
     }
@@ -1066,15 +964,9 @@ class TestExplain(RuleBuilderTestCase):
                 ),
                 player=1,
             ),
-            AtLeast.Resolved(
-                children=(
-                    HasAllCounts.Resolved((("Item 6", 1), ("Item 7", 5)), player=1),
-                    HasAnyCount.Resolved((("Item 8", 2), ("Item 9", 3)), player=1),
-                    HasFromList.Resolved(("Item 10", "Item 11", "Item 12"), count=2, player=1),
-                ),
-                count=2,
-                player=1,
-            ),
+            HasAllCounts.Resolved((("Item 6", 1), ("Item 7", 5)), player=1),
+            HasAnyCount.Resolved((("Item 8", 2), ("Item 9", 3)), player=1),
+            HasFromList.Resolved(("Item 10", "Item 11", "Item 12"), count=2, player=1),
             HasFromListUnique.Resolved(("Item 13", "Item 14"), player=1),
             HasGroup.Resolved("Group 1", ("Item 15", "Item 16", "Item 17"), player=1),
             HasGroupUnique.Resolved("Group 2", ("Item 18", "Item 19"), count=2, player=1),
@@ -1139,9 +1031,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
-            {"type": "text", "text": "At least "},
-            {"type": "color", "color": "cyan", "text": "0/2"},
-            {"type": "text", "text": " of ("},
             {"type": "text", "text": "Missing "},
             {"type": "color", "color": "cyan", "text": "some"},
             {"type": "text", "text": " of ("},
@@ -1152,7 +1041,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "salmon", "text": "Item 7"},
             {"type": "text", "text": " x5"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Missing "},
             {"type": "color", "color": "cyan", "text": "all"},
             {"type": "text", "text": " of ("},
@@ -1163,7 +1052,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "salmon", "text": "Item 9"},
             {"type": "text", "text": " x3"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "salmon", "text": "0/2"},
             {"type": "text", "text": " items from ("},
@@ -1173,7 +1062,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "salmon", "text": "Item 11"},
             {"type": "text", "text": ", "},
             {"type": "color", "color": "salmon", "text": "Item 12"},
-            {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
@@ -1241,9 +1129,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
-            {"type": "text", "text": "At least "},
-            {"type": "color", "color": "cyan", "text": "3/2"},
-            {"type": "text", "text": " of ("},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "cyan", "text": "all"},
             {"type": "text", "text": " of ("},
@@ -1254,7 +1139,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "green", "text": "Item 7"},
             {"type": "text", "text": " x5"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "cyan", "text": "some"},
             {"type": "text", "text": " of ("},
@@ -1265,7 +1150,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "green", "text": "Item 9"},
             {"type": "text", "text": " x3"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "green", "text": "30/2"},
             {"type": "text", "text": " items from ("},
@@ -1275,7 +1160,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "green", "text": "Item 11"},
             {"type": "text", "text": ", "},
             {"type": "color", "color": "green", "text": "Item 12"},
-            {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
@@ -1311,7 +1195,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "salmon", "text": "False"},
             {"type": "text", "text": ")"},
         ]
-        self.assertEqual(self.resolved_rule.explain_json(self.state), expected)
+        assert self.resolved_rule.explain_json(self.state) == expected
 
     def test_explain_json_without_state(self) -> None:
         expected: list[JSONMessagePart] = [
@@ -1339,9 +1223,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
-            {"type": "text", "text": "At least "},
-            {"type": "color", "color": "cyan", "text": "2"},
-            {"type": "text", "text": " of ("},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "cyan", "text": "all"},
             {"type": "text", "text": " of ("},
@@ -1351,7 +1232,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "item_name", "flags": 1, "text": "Item 7", "player": 1},
             {"type": "text", "text": " x5"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "cyan", "text": "any"},
             {"type": "text", "text": " of ("},
@@ -1361,7 +1242,7 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "item_name", "flags": 1, "text": "Item 9", "player": 1},
             {"type": "text", "text": " x3"},
             {"type": "text", "text": ")"},
-            {"type": "text", "text": ", "},
+            {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
             {"type": "color", "color": "cyan", "text": "2"},
             {"type": "text", "text": "x items from ("},
@@ -1370,7 +1251,6 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "item_name", "flags": 1, "text": "Item 11", "player": 1},
             {"type": "text", "text": ", "},
             {"type": "item_name", "flags": 1, "text": "Item 12", "player": 1},
-            {"type": "text", "text": ")"},
             {"type": "text", "text": ")"},
             {"type": "text", "text": " & "},
             {"type": "text", "text": "Has "},
@@ -1405,16 +1285,16 @@ class TestExplain(RuleBuilderTestCase):
             {"type": "color", "color": "salmon", "text": "False"},
             {"type": "text", "text": ")"},
         ]
-        self.assertEqual(self.resolved_rule.explain_json(), expected)
+        assert self.resolved_rule.explain_json() == expected
 
     def test_explain_str_with_state_no_items(self) -> None:
         expected = (
             "((Missing 4x Item 1",
             "| Missing some of (Missing: Item 2, Item 3)",
             "| Missing all of (Missing: Item 4, Item 5))",
-            "& At least 0/2 of (Missing some of (Missing: Item 6 x1, Item 7 x5),",
-            "Missing all of (Missing: Item 8 x2, Item 9 x3),",
-            "Has 0/2 items from (Missing: Item 10, Item 11, Item 12))",
+            "& Missing some of (Missing: Item 6 x1, Item 7 x5)",
+            "& Missing all of (Missing: Item 8 x2, Item 9 x3)",
+            "& Has 0/2 items from (Missing: Item 10, Item 11, Item 12)",
             "& Has 0/1 unique items from (Missing: Item 13, Item 14)",
             "& Has 0/1 items from Group 1",
             "& Has 0/2 unique items from Group 2",
@@ -1424,7 +1304,7 @@ class TestExplain(RuleBuilderTestCase):
             "& True",
             "& False)",
         )
-        self.assertEqual(self.resolved_rule.explain_str(self.state), " ".join(expected))
+        assert self.resolved_rule.explain_str(self.state) == " ".join(expected)
 
     def test_explain_str_with_state_all_items(self) -> None:
         self._collect_all()
@@ -1433,9 +1313,9 @@ class TestExplain(RuleBuilderTestCase):
             "((Has 4x Item 1",
             "| Has all of (Found: Item 2, Item 3)",
             "| Has some of (Found: Item 4, Item 5))",
-            "& At least 3/2 of (Has all of (Found: Item 6 x1, Item 7 x5),",
-            "Has some of (Found: Item 8 x2, Item 9 x3),",
-            "Has 30/2 items from (Found: Item 10, Item 11, Item 12))",
+            "& Has all of (Found: Item 6 x1, Item 7 x5)",
+            "& Has some of (Found: Item 8 x2, Item 9 x3)",
+            "& Has 30/2 items from (Found: Item 10, Item 11, Item 12)",
             "& Has 2/1 unique items from (Found: Item 13, Item 14)",
             "& Has 30/1 items from Group 1",
             "& Has 2/2 unique items from Group 2",
@@ -1445,16 +1325,16 @@ class TestExplain(RuleBuilderTestCase):
             "& True",
             "& False)",
         )
-        self.assertEqual(self.resolved_rule.explain_str(self.state), " ".join(expected))
+        assert self.resolved_rule.explain_str(self.state) == " ".join(expected)
 
     def test_explain_str_without_state(self) -> None:
         expected = (
             "((Has 4x Item 1",
             "| Has all of (Item 2, Item 3)",
             "| Has any of (Item 4, Item 5))",
-            "& At least 2 of (Has all of (Item 6 x1, Item 7 x5),",
-            "Has any of (Item 8 x2, Item 9 x3),",
-            "Has 2x items from (Item 10, Item 11, Item 12))",
+            "& Has all of (Item 6 x1, Item 7 x5)",
+            "& Has any of (Item 8 x2, Item 9 x3)",
+            "& Has 2x items from (Item 10, Item 11, Item 12)",
             "& Has a unique item from (Item 13, Item 14)",
             "& Has an item from Group 1",
             "& Has 2x unique items from Group 2",
@@ -1464,16 +1344,16 @@ class TestExplain(RuleBuilderTestCase):
             "& True",
             "& False)",
         )
-        self.assertEqual(self.resolved_rule.explain_str(), " ".join(expected))
+        assert self.resolved_rule.explain_str() == " ".join(expected)
 
     def test_str(self) -> None:
         expected = (
             "((Has 4x Item 1",
             "| Has all of (Item 2, Item 3)",
             "| Has any of (Item 4, Item 5))",
-            "& At least 2 of (Has all of (Item 6 x1, Item 7 x5),",
-            "Has any of (Item 8 x2, Item 9 x3),",
-            "Has 2x items from (Item 10, Item 11, Item 12))",
+            "& Has all of (Item 6 x1, Item 7 x5)",
+            "& Has any of (Item 8 x2, Item 9 x3)",
+            "& Has 2x items from (Item 10, Item 11, Item 12)",
             "& Has a unique item from (Item 13, Item 14)",
             "& Has an item from Group 1",
             "& Has 2x unique items from Group 2",
@@ -1483,7 +1363,7 @@ class TestExplain(RuleBuilderTestCase):
             "& True",
             "& False)",
         )
-        self.assertEqual(str(self.resolved_rule), " ".join(expected))
+        assert str(self.resolved_rule) == " ".join(expected)
 
 
 @classvar_matrix(

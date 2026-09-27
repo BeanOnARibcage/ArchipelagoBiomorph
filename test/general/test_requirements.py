@@ -3,8 +3,6 @@ import os
 
 
 class TestBase(unittest.TestCase):
-    world_relevant = True
-
     def test_requirements_file_ends_on_newline(self):
         """Test that all requirements files end on a newline"""
         import Utils

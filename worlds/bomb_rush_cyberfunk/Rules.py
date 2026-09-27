@@ -116,7 +116,7 @@ def versum_hill_rave(state: CollectionState, player: int, limit: bool, glitched:
         else:
             return (
                 graffitiL(state, player, limit, 85)
-                and graffitiXL(state, player, limit, 49)
+                and graffitiXL(state, player, limit, 48)
             )
     else:
         return (
