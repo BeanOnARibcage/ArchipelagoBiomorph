@@ -4,12 +4,17 @@ from .items import BiomorphItem
 
 region_locations = {"Opening": [301],
 	"Core's Lab Revisit": list(range(302, 309)),
-	"Blightmoor": list(range(1, 11)) + list(range(47, 56)) + [59, 401, 415],
+	"Blightmoor": list(range(1, 11)) + list(range(47, 56)) + [59, 60, 61, 401, 415],
 	"Blightmoor Underground": [11, 12, 13],
+	"Salm & Alma's Shop 1": [23, 24, 25, 26],
 	"Mezzo Skyway": list(range(402, 415)),
 	"Mezzo Skyway Lower Right": [416, 417, 418],
+	"Dunes of Time (below gate)": list(range(101, 113)),
+	"Dunes of Time (above gate)": list(range(113, 116)),
+	"Dunes of Time (past Ferrox Nook)": list(range(116, 123)) + [126, 127],
+	"Dunes of Time (past Miratos)": [123, 124, 125],
 	"Goal Region": [],
-	"Biomorph Unlocks": list(range(2000, 2006))}
+	"Biomorph Unlocks": list(range(2000, 20015))}
 	
 location_name_to_id = {"Core's Lab: Starting Weapon": 301,
 	"Core's Lab: Item Left of Toroth": 302,
@@ -31,10 +36,17 @@ location_name_to_id = {"Core's Lab: Starting Weapon": 301,
 	"Blightmoor: Asrar 1": 11,
 	"Blightmoor: Asrar 2": 12,
 	"Blightmoor: Asrar 3": 13,
+	"Blightmoor: Salm Kertar 1": 23,
+	"Blightmoor: Salm Kertar 2": 24,
+	"Blightmoor: Salm Kertar 3": 25,
+	"Blightmoor: Salm Kertar 4": 26,
+	"Blightmoor: Mémé (5 scargatos)": 47,
 	"Blightmoor: Marle Kertar (build the shop)": 52,
 	"Blightmoor: Meed (get the blueprint)": 53,
 	"Blightmoor: Boyd (tracking center 2)": 54,
 	"Blightmoor: Will": 59,
+	"Blightmoor: Salm Kertar (get the blueprint)": 60,
+	"Blightmoor: Skipio (deliver the lock)": 61,
 	"Mezzo: Abandoned Delivery Bay Arena": 401,
 	"Mezzo: Breakable Wall Near First Fubirang": 402,
 	"Mezzo: Scargato Through Narrow Passage": 404,
@@ -47,9 +59,43 @@ location_name_to_id = {"Core's Lab: Starting Weapon": 301,
 	"Mezzo: Gorgerzer Reward": 413,
 	"Mezzo: Hidden Area Above Floroxes": 417,
 	"Mezzo: Secret Highway Arena": 418,
+	"Dunes: Main Room Crystal Wall": 101,
+	"Dunes: Entrance Crystal Wall": 103,
+	"Dunes: Main Room Wall Jump Nook": 104,
+	"Dunes: Restless Sands Arena": 106,
+	"Dunes: Alma's Ring": 107,
+	"Dunes: Scargato Before Salm": 109,
+	"Dunes: Across Spikes Above Salm": 110,
+	"Dunes: Salm Kertar (return the ring)": 111,
+	"Dunes: Spike Maze Scargato": 112,
+	"Dunes: Will": 114,
+	"Dunes: Passage Near Hidden SAFE": 115,
+	"Dunes: Ferrox Nook Arena": 116,
+	"Dunes: Laser Chimney": 118,
+	"Dunes: Scargato Above Busko": 119,
+	"Dunes: Mind's Desire Arena": 120,
+	"Dunes: Busko (start quest)": 121,
+	"Dunes: Item Near Water": 122,
+	"Dunes: Miratos Reward": 123,
+	"Dunes: Light Puzzle Near Miratos": 125,
+	"Dunes: Laser Circuit Hidden Cave": 126,
+	"Dunes: Hidden Cave Under First Generator": 127,
 	"Biomorphs: 6 Fubirangs": 2000,
 	"Biomorphs: 6 Scarbyttles": 2003,
-	"Biomorphs: 12 Scarbyttles": 2004}
+	"Biomorphs: 12 Scarbyttles": 2004,
+	"Biomorphs: 5 Toroths": 2006,
+	"Biomorphs: 10 Toroths": 2007,
+	"Biomorphs: 14 Toroths": 2008,
+	"Biomorphs: 3 Sorios": 2009,
+	"Biomorphs: 5 Sorios": 2010,
+	"Biomorphs: 8 Sorios": 2011,
+	"Biomorphs: 4 Klereks": 2012,
+	"Biomorphs: 7 Klereks": 2013}
+
+categories = ("Core's Lab", "Blightmoor", "Mezzo", "Dunes", "Biomorphs")
+def category_locations(category):
+	return {x for x in location_name_to_id if x.startswith(category)}	
+location_groups = {category: category_locations(category) for category in categories}
 
 def subset_location_name_to_id(region_name):
 	locations = region_locations[region_name]
@@ -65,9 +111,21 @@ def create_regions_function(world):
 	create_events(world)
 		
 monster_locations = \
-	{"Mezzo Skyway": {"Fubirang": [1, 2, 3, 4, 5, 8, 9, 10, 11, 12],
+	{"Opening": {"Toroth": [1]},
+	"Core's Lab Revisit": {"Toroth": [2, 3]},
+	"Mezzo Skyway": {"Fubirang": [1, 2, 3, 4, 5, 8, 9, 10, 11, 12],
 		"Scarbyttle": [1, 2, 3, 4, 5, 8, 9, 12, 13, 14, 15, 16]},
-	"Mezzo Skyway Lower Right": {"Scarbyttle": [10, 11]}}
+	"Mezzo Skyway Lower Right": {"Scarbyttle": [10, 11]},
+	"Dunes of Time (below gate)": {"Toroth": [4, 5, 6],
+		"Klerek": [1],
+		"Sorios": [1, 2, 3, 4]},
+	"Dunes of Time (above gate)": {"Toroth": [7],
+		"Klerek": [2, 3]},
+	"Dunes of Time (past Ferrox Nook)": {"Toroth": [8, 9, 10, 12, 13, 14],
+		"Klerek": [4, 5, 6, 7, 8, 9],
+		"Sorios": [5, 6, 7, 8]},
+	"Dunes of Time (past Miratos)": {"Toroth": [11],
+		"Klerek": [10]}}
 	
 def create_events(world):
 	for region_name in monster_locations:
@@ -76,8 +134,13 @@ def create_events(world):
 			for monster_number in monster_locations[region_name][monster_name]:
 				region.add_event(monster_name + " " + str(monster_number), \
 					monster_name + " Progress", None, BiomorphLocation, BiomorphItem)
+	dunes_3 = world.get_region("Dunes of Time (past Ferrox Nook)")
+	dunes_4 = world.get_region("Dunes of Time (past Miratos)")
+	dunes_3.add_event("Generator 1", "Generator", None, BiomorphLocation, BiomorphItem)
+	dunes_3.add_event("Generator 2", "Generator", None, BiomorphLocation, BiomorphItem)
+	dunes_4.add_event("Generator 3", "Generator", None, BiomorphLocation, BiomorphItem)
 	goal_region = world.get_region("Goal Region")
-	goal_region.add_event("Enter the Dunes", "Goal", None, BiomorphLocation, BiomorphItem)
+	goal_region.add_event("Open the Athenaeum", "Goal", None, BiomorphLocation, BiomorphItem)
 		
 class BiomorphLocation(Location):
 	game = "Biomorph"
