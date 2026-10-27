@@ -29,21 +29,31 @@ def connect_regions(world):
 	skyway_lower_right = world.get_region("Mezzo Skyway Lower Right")
 	skyway.connect(skyway_lower_right, "Skyway Lower Right Wall Climb", wall_jump)
 	
-	dunes_below = world.get_region("Dunes of Time (below gate)")
-	skyway.connect(dunes_below, "Dunes of Time Entrance", arena_logic)
+	dunes_entrance_1 = world.get_region("Dunes of Time (entrance 1)")
+	skyway.connect(dunes_entrance_1, "Dunes of Time Entrance", arena_logic)
+	
+	dunes_entrance_2 = world.get_region("Dunes of Time (entrance 2)")
+	dunes_entrance_1.connect(dunes_entrance_2, "Dunes Entrance Light Puzzle")
+	
+	dunes_main = world.get_region("Dunes of Time (main area)")
+	dunes_entrance_2.connect(dunes_main, "Dunes Crystal Into Main Room")
+	dunes_main.connect(dunes_entrance_2, "Dunes Crystal Backwards From Main Room",
+		rb.Has("Toroth Biomorph"))
 	
 	dunes_above = world.get_region("Dunes of Time (above gate)")
 	dunes_access_card = rb.Has("Old Military Access Card")
-	dunes_below.connect(dunes_above, "Dunes Access Gate", dunes_access_card)
-	dunes_above.connect(dunes_below, "Dunes Access Gate backwards", dunes_access_card)
+	dunes_main.connect(dunes_above, "Dunes Access Gate", dunes_access_card)
+	dunes_above.connect(dunes_main, "Dunes Access Gate backwards", dunes_access_card)
 	dunes_above.connect(skyway_lower_right, "Dunes to Skyway Upper Passage", wall_jump)
 	skyway_lower_right.connect(dunes_above, "Skyway to Dunes Upper Passage", wall_jump)
 	
-	dunes_3 = world.get_region("Dunes of Time (past Ferrox Nook)")
-	dunes_above.connect(dunes_3, "Clear Ferrox Nook", arena_logic)
+	dunes_ferrox = world.get_region("Dunes of Time (past Ferrox Nook)")
+	dunes_above.connect(dunes_ferrox, "Clear Ferrox Nook", arena_logic)
 	
-	dunes_4 = world.get_region("Dunes of Time (past Miratos)")
-	dunes_3.connect(dunes_4, "Defeat Miratos", arena_logic)
+	dunes_miratos = world.get_region("Dunes of Time (past Miratos)")
+	dunes_ferrox.connect(dunes_miratos, "Defeat Miratos", arena_logic)
+	
+	dunes_ferrox.connect(dunes_main, "Up Into Dunes Main Room")
 	
 	goal = world.get_region("Goal Region")
 	dunes_above.connect(goal, "Athenaeum Door", rb.Has("Generator", 3))
